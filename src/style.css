@@ -1,24 +1,44 @@
 html {
   --section-background-color: linear-gradient(
     to bottom left,
-    rgba(17, 16, 16, 0.582),
-    rgba(12, 8, 24, 0.904)
+    rgba(64, 39, 163, 1),
+    rgba(155, 46, 191, 0.904)
   );
 
   --image-gradient: linear-gradient(
     to bottom left,
-    rgba(17, 16, 16, 0.678),
-    rgba(12, 10, 22, 0.863)
+    rgba(64, 39, 163, 1),
+    rgba(155, 46, 191, 0.904)
   );
 
-  --imp-text-color: #c770f0;
+  --imp-text-color: #90158e;
+
+  
 }
+
+.fade-enter {
+  opacity: 0;
+}
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms ease-in;
+}
+.fade-exit {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-in;
+}
+
+
 .button-class {
   z-index: 10; /* 예시 값 */
 }
 .purple {
   color: var(--imp-text-color) !important;
 }
+
 
 button:focus {
   box-shadow: none !important;
@@ -46,21 +66,11 @@ button:focus {
 
 #no-scroll {
   overflow: hidden;
-  height: 100vh;
 }
 
 /* --------- */
 /*Scrollbar   */
 /* --------- */
-
-::-webkit-scrollbar {
-  width: 7px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-  background: #2d1950;
-}
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
@@ -284,17 +294,17 @@ button:focus {
 }
 
 .main-name {
-  color: #cd5ff8;
+  color:#5b006f;
 }
 
 .Typewriter__wrapper {
   font-size: 2.2em !important;
-  color: #be6adf !important;
+  color: #370044 !important;
   font-weight: 600 !important;
 }
 .Typewriter__cursor {
   font-size: 2.4em !important;
-  color: #b562d6 !important;
+  color: #370044 !important;
 }
 
 @media (max-width: 767px) {
@@ -405,7 +415,7 @@ button:focus {
 /* Footer */
 /* --------- */
 .footer {
-  background-color: rgb(10, 4, 22);
+  /* background-color: rgb(10, 4, 22); */
   bottom: 0 !important;
   padding-top: 10px !important;
   padding-bottom: 8px !important ;
@@ -451,29 +461,99 @@ button:focus {
   position: relative !important;
   padding-top: 150px !important;
   padding-bottom: 30px !important;
-  background-image: var(--section-background-color) !important;
+  height: 100% !important;
+
 }
 
+.project-section1 {
+  position: relative !important;
+  padding-top: 150px !important;
+  padding-bottom: 30px !important;
+  height: 100% !important;
+  display: flex;
+  justify-content: center; /* 가로 중앙 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
+}
+
+
+
 .project-card {
-  padding-top: 50px !important;
-  padding-bottom: 50px !important;
-  padding-left: 25px !important;
-  padding-right: 25px !important;
+  padding-top: 100px !important;
+  padding-bottom: 100px !important;
+  padding-left: 100px !important;
+  padding-right: 100px !important;
   height: auto !important;
 }
 
+.parent-container {
+  display: flex;
+  justify-content: center; /* 가로 중앙 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
+}
+
+.project-card-view .card-title {
+  font-size: 30px; /* 원하는 폰트 사이즈로 변경 */
+  font-weight: bold;
+}
+
 .project-card-view {
-  box-shadow: 0 4px 5px 3px rgba(119, 53, 136, 0.459) !important;
-  color: white !important;
+  box-shadow: 0px 0px  15px 5px rgba(119, 53, 136, 0.8) !important;
+  color: black !important;
   background-color: transparent !important;
   opacity: 0.9 !important;
   transition: all 0.5s ease 0s !important;
   height: 100% !important;
 }
 .project-card-view:hover {
-  transform: scale(1.02) !important;
+  transform: scale(1.06) !important;
   overflow: hidden !important;
-  box-shadow: 0 4px 4px 5px rgba(129, 72, 144, 0.561) !important;
+  box-shadow: 0px 0px  15px 5px rgba(129, 72, 144, 1) !important;
+}
+
+.card-flex-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-right: 100px;
+  height: 100%;
+  width: 100%;
+}
+
+.card-flex-item {
+  padding: 10px;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+}
+
+.level-card .card-title {
+  font-size: 2em;
+  font-weight: bold;
+  padding-top: 30%; 
+}
+
+.level-card {
+  padding: 25px 100px 40px 100px;
+
+  width: 700px; /* 카드 너비 조정 */
+  font-size: 1.3em;
+}
+
+.level-card-view {
+  box-shadow: 0px 0px 15px 5px rgba(119, 53, 136, 0.8);
+  color: black;
+  background-color: transparent !important;
+  opacity: 0.9;
+  transition: all 0.5s ease 0s;
+  margin-left: 300px;
+  width: 500px /* 카드 너비 조정 */!important;
+  height: 170px /* 카드 높이 조정 */!important;
+}
+
+.level-card-view:hover {
+  transform: scale(1.06);
+  overflow: hidden;
+  box-shadow: 0px 0px 15px 5px rgba(129, 72, 144, 1);
 }
 
 .blog-card {
@@ -508,6 +588,7 @@ button:focus {
 }
 
 .card-img-top {
+  width: 100px;
   padding: 20px !important;
   opacity: 0.8 !important;
   border-radius: 10px !important;
@@ -536,7 +617,7 @@ button:focus {
 }
 .project-heading {
   color: white !important;
-  font-size: 2.3em !important;
+  font-size: 4.3em !important;
   font-weight: 500 !important;
   padding-top: 10px !important;
 }

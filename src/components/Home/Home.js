@@ -14,7 +14,7 @@ function Home() {
   const handleStartClick = () => {
 
     console.log("Button clicked"); // 콘솔에 로그 출력
-    navigate("/project"); // '/about' 경로로 이동
+    navigate("/handed"); //
   };
 
   
@@ -24,6 +24,14 @@ function Home() {
         <Particle />
         <Container className="home-content">
           <Row>
+            <Col md={5} style={{ paddingBottom: 20 }}>
+              <img
+                src={homeLogo}
+                alt="home pic"
+                className="img-fluid"
+                style={{ maxHeight: "500px" }}
+              />
+            </Col>
             <Col md={7} className="home-header">
               <h1 style={{ paddingBottom: 15 }} className="heading">
                 Hi There!{" "}
@@ -41,15 +49,6 @@ function Home() {
                 <Type />
               </div>
             </Col>
-
-            <Col md={5} style={{ paddingBottom: 20 }}>
-              <img
-                src={homeLogo}
-                alt="home pic"
-                className="img-fluid"
-                style={{ maxHeight: "1000px" }}
-              />
-            </Col>
           </Row>
           <Row className="mt-4">
             <Col className="button-class">
@@ -57,9 +56,10 @@ function Home() {
                 className=""
                 variant="primary"
                 size="lg"
-                style={{ padding: '10px 30px', fontSize: '3rem', fontFamily: 'arial', marginLeft: '590px'}} // 버튼 사이즈와 폰트 크기 조정
+                style={{ width: '400px' , padding: '10px 30px', fontSize: '4rem', fontFamily: 'sans-serif', marginLeft: '450px', borderRadius: '50px'}} // 버튼 사이즈와 폰트 크기 조정
                 onClick={handleStartClick}>
-                Start
+                Let's go
+
               </Button>
               
             </Col>

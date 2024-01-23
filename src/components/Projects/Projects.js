@@ -1,41 +1,49 @@
+// Projects.js
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import ProjectCard from "./ProjectCards";
 import Particle from "../Particle";
-import leaf from "../../Assets/Projects/leaf.png";
-import emotion from "../../Assets/Projects/emotion.png";
-import editor from "../../Assets/Projects/codeEditor.png";
-import chatify from "../../Assets/Projects/chatify.png";
-import suicide from "../../Assets/Projects/suicide.png";
-import right from "../../Assets/righthanded.svg";
-import left from "../../Assets/lefthanded.svg";
+import { useNavigate } from "react-router-dom";
+import righthanded from "../../Assets/righthanded.svg";
+import lefthanded from "../../Assets/lefthanded.svg";
+import Typewriter from "typewriter-effect";
+
 function Projects() {
+
   return (
-    <Container fluid className="project-section">
-      <Particle />
-      <Container>
-        <h1 className="project-heading">
-          Are <strong className="purple">you?</strong>
-        </h1>
+<Container fluid className="project-section">
+  <Particle />
+  <Container>
+    <div className="typewriter-text">
+      <Typewriter
+        options={{
+          strings: ['Are <span style="color: purple;">you</span>?'],
+          autoStart: true,
+          loop: false,
+          delay: 75,
+          deleteSpeed: Infinity
+
+        }}
+      />
+    </div>
+
+
 
         <Row style={{ justifyContent: "center", paddingBottom: "10px" }}>
-          <Col md={4} className="project-card">
-            <ProjectCard
-              imgPath={right}
-            
-              title="Left-Handed"
-            
-            />
-          </Col>
-
-          <Col md={4} className="project-card">
-            <ProjectCard
-              imgPath={left}
-              title="Right-Handed"
-            />
-          </Col>
-
-        
+        <Col md={5} className="project-card">
+          <ProjectCard
+            imgPath={lefthanded}
+            title="Left-handed"
+            path="/left/levels" // path prop 전달
+          />
+        </Col>
+        <Col md={5} className="project-card">
+          <ProjectCard
+            imgPath={righthanded}
+            title="Right-handed"
+            path="/right/levels" // path prop 전달
+          />
+        </Col>
         </Row>
       </Container>
     </Container>
