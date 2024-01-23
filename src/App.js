@@ -13,6 +13,7 @@ import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import RightLevels from "./components/RightLevels/RightLevels";
 import LeftLevels from "./components/LeftLevels/LeftLevels";
+import Level1 from "./components/Levels/Level1";
 
 function App() {
   const [load, updateLoad] = useState(true);
@@ -51,6 +52,7 @@ function PageTransitions() {
           <Route path="/resume" element={<Resume />} />
           <Route path="/left/levels" element={<LeftLevels/>} />
           <Route path="/right/levels" element={<RightLevels/>} />
+          <Route path="/right/level1" element={<Level1/>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </CSSTransition>
