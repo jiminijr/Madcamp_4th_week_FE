@@ -28,108 +28,69 @@ const Level1 = () => {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
 
-//   const styles = {
-//     container: css`
-//       display: flex;
-//       justify-content: center;
-//       align-items: center;
-//       width: 100vw;
-//       height: 100vh;
-//     `,
-//     webcamContainer: css`
-//       flex: 1;
-//       display: flex;
-//       justify-content: center;
-//       align-items: center;
-//     `,
-//     canvasContainer: css`
-//       flex: 1;
-//       display: flex;
-//       justify-content: center;
-//       align-items: center;
-//     `,
-//     .canvas: css`
-//       background-color: #fff;
-//     `}
 
-
-const onResults = (results) => {
+  const onResults = (results) => {
+    // MediaPipe 결과를 캔버스에 그리는 로직
     const canvasElement = canvasRef.current;
     const videoElement = videoRef.current;
     
     if (canvasElement && videoElement) {
       const ctx = canvasElement.getContext('2d');
-      ctx.save();
-      
-      // Clear previous frame
       ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-
-      // Draw the webcam feed
       ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-
-      // Draw the hands annotations from MediaPipe
       drawCanvas(ctx, results);
-
-      ctx.restore();
     }
   };
 
+
+
+
   useEffect(() => {
     const hands = new Hands({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-    });
-
-    hands.setOptions({
-      maxNumHands: 2,
-      modelComplexity: 1,
-      minDetectionConfidence: 0.5,
-      minTrackingConfidence: 0.5
-    });
-
-    hands.onResults(onResults);
-
-    // Use the existing video element for MediaPipe processing
-    if (videoRef.current) {
-      hands.send({ image: videoRef.current }).catch(console.error);
-    }
-  }, []);
-
-
-  useEffect(() => {
-      // 웹소켓 연결
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+      });
+    
+      hands.setOptions({
+        maxNumHands: 2,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+      });
+    
+      hands.onResults(onResults);
+    
       const socket = io('http://localhost:9999', { withCredentials: true, transports: ['websocket'] });
 
+    
       const startCamera = async () => {
-          try {
-              const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-              videoRef.current.srcObject = stream;
-
-              videoRef.current.onloadedmetadata = () => {
-                  // 비디오 메타데이터가 로드된 후에 실행되는 콜백
-                  // 여기에서 비디오 크기와 관련된 작업을 수행할 수 있습니다.
-
-                  const captureImage = () => {
-                      if (videoRef.current) {
-                          const canvas = document.createElement('canvas');
-                          const context = canvas.getContext('2d');
-                          canvas.width = videoRef.current.videoWidth;
-                          canvas.height = videoRef.current.videoHeight;
-                          context.drawImage(videoRef.current, 0, 0, videoRef.current.videoWidth, videoRef.current.videoHeight);
-                          const imageData = canvas.toDataURL('image/jpeg', 0.8);
-                          socket.emit('prediction', imageData);
-                      }
-                  };
-
-                  const intervalId = setInterval(captureImage, 500);
-
-                  // 컴포넌트가 언마운트 될 때 setInterval을 클리어하는 정리 함수
-                  return () => clearInterval(intervalId);
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          videoRef.current.srcObject = stream;
+  
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current.play();
+  
+            const captureImage = () => {
+              if (videoRef.current) {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = videoRef.current.videoWidth;
+                canvas.height = videoRef.current.videoHeight;
+                context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+                const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                socket.emit('prediction', imageData);
               }
-          } catch (error) {
-              console.error('웹캠 액세스 오류:', error);
-          }
+            };
+  
+            const intervalId = setInterval(captureImage, 500);
+  
+            return () => clearInterval(intervalId);
+          };
+        } catch (error) {
+          console.error('웹캠 액세스 오류:', error);
+        }
       };
-
+  
       startCamera();
 
       socket.on('prediction_result', (data) => {
@@ -276,16 +237,17 @@ const onResults = (results) => {
   </div>
 
   <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-  <div>
+  {/* <div>
         <canvas
           ref={canvasRef}
           width={640}
-          height={720}
+          height={1000}
         />
-      </div>
+      </div> */}
     <div>
-      <h1>Predict 페이지</h1>
-  <video ref={videoRef} width="640" height="480" autoPlay></video>
+      <div className="video-container">
+    <video ref={videoRef} width="50vw" height="100vh" autoPlay></video>
+  </div>
 
     </div>
   </div>
