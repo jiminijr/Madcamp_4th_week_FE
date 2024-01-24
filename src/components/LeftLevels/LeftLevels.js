@@ -33,7 +33,7 @@ function LeftLevels(props) {
           <LeftLevelsCards
             imgPath={one}
             title="Level 1"
-            path='/left/levels'
+            path='/left/level1'
           />
         </Row>
         <Row className="level-card">

@@ -34,16 +34,17 @@ function Home() {
             </Col>
             <Col md={7} className="home-header">
               <h1 style={{ paddingBottom: 15 }} className="heading">
-                Hi There!{" "}
+                Welcome to{" "}
+                <strong className="main-name"> SIGNify</strong>
                 <span className="wave" role="img" aria-labelledby="wave">
-                  👋🏻
+                   👋🏻
                 </span>
               </h1>
-
+{/* 
               <h1 className="heading-name">
                 We're
-                <strong className="main-name"> SIGNify</strong>
-              </h1>
+
+              </h1> */}
 
               <div style={{ padding: 50, textAlign: "left" }}>
                 <Type />
@@ -56,7 +57,7 @@ function Home() {
                 className=""
                 variant="primary"
                 size="lg"
-                style={{ width: '400px' , padding: '10px 30px', fontSize: '4rem', fontFamily: 'sans-serif', marginLeft: '450px', borderRadius: '50px'}} // 버튼 사이즈와 폰트 크기 조정
+                style={{ width: '300px' , padding: '10px 30px', fontSize: '2rem', fontFamily: 'sans-serif', marginTop: '60px', marginLeft: '520px', borderRadius: '50px'}} // 버튼 사이즈와 폰트 크기 조정
                 onClick={handleStartClick}>
                 Let's go
 
