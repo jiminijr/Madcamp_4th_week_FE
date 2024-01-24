@@ -17,13 +17,13 @@ export const drawCanvas = (ctx, results) => {
     // 골격 묘사
     for (const landmarks of results.multiHandLandmarks) {
       drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
-        color: "#000000",
-        lineWidth: 5,
-      });
-      drawLandmarks(ctx, landmarks, {
         color: "#FFFFFF",
         lineWidth: 1,
-        radius: 5,
+      });
+      drawLandmarks(ctx, landmarks, {
+        color: "FFFFFF",
+        lineWidth: 1,
+        radius: 1,
       });
     }
   }
