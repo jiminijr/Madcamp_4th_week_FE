@@ -8,12 +8,6 @@ import { drawCanvas } from "../../components/Utils/drawCanvas";
 const words = ['happy', 'love', 'good'];
 
 const Level1 = () => {
-
-  // let currentLetterIndex=0;
-  // let currentWordIndex=0;
-  //currentLetterIndex = currentLetterIndex+1;
-  //currentWordIndex = currentWordIndex +1;
-    
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
   const [inputValue, setInputValue] = useState('');
@@ -37,8 +31,9 @@ const Level1 = () => {
   // 새로운 모달 창 관리
   const [isModalOpened, setIsModalOpened] = useState(false);
 
-  // skip 함수 부분
+  // skip버튼을 눌렀을 때 동작
   const handleSkip = () => {
+    // 모든 단어가 끝났을 경우
     if ((currentWordIndex === words.length - 1) && (currentLetterIndex === words[currentWordIndex].length - 1)) {
       setTotalCount((prevIndex) => prevIndex + 1);
       setShowPopup(true);
@@ -47,16 +42,18 @@ const Level1 = () => {
       setAccuracy(calculateAccuracy());
       return;
     }
+    // 단어 하나가 끝났을 경우
     if (currentLetterIndex === words[currentWordIndex].length - 1) {
       setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
       setCurrentLetterIndex(0);
       setTotalCount((prevIndex) => prevIndex + 1);
-    } else {
+    }
+    // 단어 중간인 경우
+    else {
       setCurrentLetterIndex((prevIndex) => prevIndex + 1);
       setTotalCount((prevIndex) => prevIndex + 1);
     }
     setShowButton(false); // 단어의 마지막 철자가 아닐 때 버튼 숨김
-    //setTotalCount((prevIndex) => prevIndex + 1);
   };
 
   // 정답률 계산 함수
@@ -68,8 +65,6 @@ const Level1 = () => {
     console.log(totalCount);
     return (correctCount / (totalCount+1)) * 100;
   };
-
-
 
   const onResults = (results) => {
     // MediaPipe 결과를 캔버스에 그리는 로직
@@ -83,9 +78,6 @@ const Level1 = () => {
       drawCanvas(ctx, results);
     }
   };
-
-
-
 
   useEffect(() => {
     const hands = new Hands({
@@ -103,7 +95,6 @@ const Level1 = () => {
     
       const socket = io('http://172.10.5.163:80', { withCredentials: true, transports: ['websocket'] });
 
-    
       const startCamera = async () => {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -112,6 +103,7 @@ const Level1 = () => {
           videoRef.current.onloadedmetadata = () => {
             videoRef.current.play();
   
+            // 이미지 캡쳐 후 웹소켓을 통해 서버로 이미지 전송
             const captureImage = () => {
               if (videoRef.current) {
                 const canvas = document.createElement('canvas');
@@ -123,7 +115,7 @@ const Level1 = () => {
                 socket.emit('prediction', imageData);
               }
             };
-  
+            // 서버로 전송하는 시간 간격 설정
             const intervalId = setInterval(captureImage, 1000);
   
             return () => clearInterval(intervalId);
@@ -135,20 +127,21 @@ const Level1 = () => {
   
       startCamera();
 
+      // 서버로부터 데이터를 수신했을 경우
       socket.on('prediction_result', (data) => {
           console.log(data);
-          // 여기서 data를 활용하여 결과를 표시하거나 상태를 업데이트할 수 있습니다.
-          console.log("received!");
-          console.log("totalalpha: ",totalCount);
           if (data.alphabet) {
+            // 정답 알파벳과 손동작에 해당하는 알파벳이 일치하는 경우
             if (String(data.alphabet).toLowerCase() === currentLetter.toLowerCase()) {
               console.log("correct!");
               setInputValue('');
               setCorrectCount((prevCount) => prevCount + 1);
               setTotalCount((prevCount) => prevCount + 1);
 
+              // 단어 하나가 끝났을 경우
               if (currentLetterIndex === currentWord.length - 1) {
                 setWordCount((prevIndex) => prevIndex + 1);
+                // 전체 단어가 끝났을 경우
                 if (currentWordIndex === words.length - 1) {
                   setShowPopup(true);
                   setAllWordsDisplayed(true);
@@ -159,10 +152,10 @@ const Level1 = () => {
                   setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
                   setCurrentLetterIndex(0);
                 }
-              } else {
-                console.log("next letter")
+              }
+              // 단어 중간일 경우
+              else {
                 setCurrentLetterIndex((prevIndex) => prevIndex + 1);
-                console.log("next index: "+currentLetterIndex);
               }
             }
           }
@@ -178,6 +171,7 @@ const Level1 = () => {
     socketRef.current = io('http://172.10.5.163:80', { withCredentials: true, transports: ['websocket'] });
 
     // 서버로부터 정답 알파벳 수신
+    // 이거 없애도 될 듯
     socketRef.current.on('answer', (answer) => {
       setServerAnswer(answer);
       
