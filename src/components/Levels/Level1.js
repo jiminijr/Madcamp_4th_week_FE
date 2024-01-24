@@ -8,17 +8,23 @@ import { drawCanvas } from "../../components/Utils/drawCanvas";
 const words = ['happy', 'love', 'good'];
 
 const Level1 = () => {
+
+  // let currentLetterIndex=0;
+  // let currentWordIndex=0;
+  //currentLetterIndex = currentLetterIndex+1;
+  //currentWordIndex = currentWordIndex +1;
     
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
   const [inputValue, setInputValue] = useState('');
   const [correctCount, setCorrectCount] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const [wordCount, setWordCount] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
-  const [incorrectCount, setIncorrectCount] = useState(0);
   const [allWordsDisplayed, setAllWordsDisplayed] = useState(false);
   const [showButton, setShowButton] = useState(false); // 새로운 버튼 표시 여부 상태 추가
+  const [showModal, setShowModal] = useState(false);
   const [showSmallScreen, setShowSmallScreen] = useState(false); // 작은 화면 표시 여부 상태 추가
   const [nextWord, setNextWord] = useState(''); // 다음 word를 담는 상태 추가
   const [serverAnswer, setServerAnswer] = useState('');
@@ -27,6 +33,42 @@ const Level1 = () => {
   const socketRef = useRef(null);
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
+
+  // 새로운 모달 창 관리
+  const [isModalOpened, setIsModalOpened] = useState(false);
+
+  // skip 함수 부분
+  const handleSkip = () => {
+    if ((currentWordIndex === words.length - 1) && (currentLetterIndex === words[currentWordIndex].length - 1)) {
+      setTotalCount((prevIndex) => prevIndex + 1);
+      setShowPopup(true);
+      setAllWordsDisplayed(true);
+      setShowButton(true); // 단어의 마지막 철자일 때 버튼 표시
+      setAccuracy(calculateAccuracy());
+      return;
+    }
+    if (currentLetterIndex === words[currentWordIndex].length - 1) {
+      setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
+      setCurrentLetterIndex(0);
+      setTotalCount((prevIndex) => prevIndex + 1);
+    } else {
+      setCurrentLetterIndex((prevIndex) => prevIndex + 1);
+      setTotalCount((prevIndex) => prevIndex + 1);
+    }
+    setShowButton(false); // 단어의 마지막 철자가 아닐 때 버튼 숨김
+    //setTotalCount((prevIndex) => prevIndex + 1);
+  };
+
+  // 정답률 계산 함수
+  const calculateAccuracy = () => {
+    if (totalCount === 0) {
+      return 0;
+    }
+    console.log(correctCount);
+    console.log(totalCount);
+    return (correctCount / (totalCount+1)) * 100;
+  };
+
 
 
   const onResults = (results) => {
@@ -59,7 +101,7 @@ const Level1 = () => {
     
       hands.onResults(onResults);
     
-      const socket = io('http://172.10.7.41:80', { withCredentials: true, transports: ['websocket'] });
+      const socket = io('http://172.10.5.163:80', { withCredentials: true, transports: ['websocket'] });
 
     
       const startCamera = async () => {
@@ -82,7 +124,7 @@ const Level1 = () => {
               }
             };
   
-            const intervalId = setInterval(captureImage, 500);
+            const intervalId = setInterval(captureImage, 1000);
   
             return () => clearInterval(intervalId);
           };
@@ -96,20 +138,49 @@ const Level1 = () => {
       socket.on('prediction_result', (data) => {
           console.log(data);
           // 여기서 data를 활용하여 결과를 표시하거나 상태를 업데이트할 수 있습니다.
+          console.log("received!");
+          console.log("totalalpha: ",totalCount);
+          if (data.alphabet) {
+            if (String(data.alphabet).toLowerCase() === currentLetter.toLowerCase()) {
+              console.log("correct!");
+              setInputValue('');
+              setCorrectCount((prevCount) => prevCount + 1);
+              setTotalCount((prevCount) => prevCount + 1);
+
+              if (currentLetterIndex === currentWord.length - 1) {
+                setWordCount((prevIndex) => prevIndex + 1);
+                if (currentWordIndex === words.length - 1) {
+                  setShowPopup(true);
+                  setAllWordsDisplayed(true);
+                  setAccuracy(calculateAccuracy());
+                  setShowButton(true);
+                  return;
+                } else {
+                  setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
+                  setCurrentLetterIndex(0);
+                }
+              } else {
+                console.log("next letter")
+                setCurrentLetterIndex((prevIndex) => prevIndex + 1);
+                console.log("next index: "+currentLetterIndex);
+              }
+            }
+          }
       });
 
       return () => {
           socket.disconnect();
       };
-  }, []);
+  }, [currentLetterIndex, currentWordIndex]);
 
   useEffect(() => {
     // 웹소켓 클라이언트 설정
-    socketRef.current = io('http://172.10.7.41:80', { withCredentials: true, transports: ['websocket'] });
+    socketRef.current = io('http://172.10.5.163:80', { withCredentials: true, transports: ['websocket'] });
 
     // 서버로부터 정답 알파벳 수신
     socketRef.current.on('answer', (answer) => {
       setServerAnswer(answer);
+      
     });
 
     return () => {
@@ -118,77 +189,22 @@ const Level1 = () => {
   }, []);
 
 
-  const handleKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      // 사용자 입력과 서버 응답 비교
-      if (inputValue.toLowerCase() === serverAnswer.toLowerCase()) {
-        setCorrectCount((prevCount) => prevCount + 1);
-        if (correctCount + 1 >= 5) {
-          console.log('정답!');
-        }
-      } else {
-        console.log('오답');
-      }
-      setInputValue('');
-      setTotalCount((prevCount) => prevCount + 1);
-    }
-  };
-
+  // Modal 창 띄우는 곳
   useEffect(() => {
-    let timeoutId; // 타이머 식별자를 저장할 변수
-  
-    const showSmallScreenTimer = () => {
-      setShowSmallScreen(true);
-      setNextWord(words[(currentWordIndex + 1) % words.length]); // 다음 word 설정
-  
-      // 입력 받는 시간 설정
-      const inputTime = currentWordIndex === 0 ? 10000 : 5000;
-  
-      timeoutId = setTimeout(() => {
-        setShowSmallScreen(false);
-        setNextWord(''); // 다음 word 초기화
-  
-        inputRef.current.focus();
-      }, inputTime);
-    };
+    if (currentLetterIndex === 0) {
+      setShowModal(true);
 
-    const mainTimer = () => {
-      if (currentLetterIndex === words[currentWordIndex].length - 1) {
-        setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
-        setCurrentLetterIndex(0);
-        setInputValue('');
-        setIncorrectCount(0);
-  
-        if (currentWordIndex === words.length - 1 && allWordsDisplayed) {
-          // 수정: 정답률 계산을 현재까지의 맞춘 철자 수로 변경
-          // const newAccuracy = (correctCount / totalCount) * 100;
-          // setAccuracy(newAccuracy);
-          console.log("useeffect 최종 갯수 :", correctCount);
-          console.log("useeffect 총 count 갯수 :", totalCount);
-          setShowPopup(true);
-          // 새로운 버튼 표시
-          setShowButton(true);
-          // 수정: 모든 단어를 표시했음을 초기화
-          setAllWordsDisplayed(true);
+      const modalTimeoutId = setTimeout(() => {
+        setShowModal(false);
+      }, 3000);
 
-          setTimeout(() => {
-            setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
-          }, 5000);
-        }
-      } else {
-        setCurrentLetterIndex((prevIndex) => prevIndex + 1);
-      }
-      setTotalCount((prevCount) => prevCount + 1);
-      // 작은 화면 타이머 재시작
-      showSmallScreenTimer();
-    };
+      return () => {
+        clearTimeout(modalTimeoutId);
+      };
+    }
+  }, [currentLetterIndex, currentWordIndex]);
 
-    timeoutId = setTimeout(mainTimer, 3000); // 초기 실행
 
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [currentWordIndex, currentLetterIndex, allWordsDisplayed, correctCount, totalCount, showPopup]);
 
   const currentWord = words[currentWordIndex];
   const currentLetter = currentWord[currentLetterIndex];
@@ -197,46 +213,36 @@ const Level1 = () => {
     setInputValue(event.target.value);
   };
 
-  useEffect(() => {
-    inputRef.current.focus();
-  }, []);
-
   return (
 <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
     {!allWordsDisplayed && currentWord && (
       <div>
         {currentWord.split('').map((letter, index) => (
-          <span key={index} style={{ fontSize: index === currentLetterIndex ? '3em' : '2em' }}>
+          <span key={index} style={{ fontSize: index === currentLetterIndex ? '3em' : '2em', color: index === currentLetterIndex ? 'purple' : 'black' }}>
             {letter}
           </span>
         ))}
       </div>
     )}
-
-    <input
-      ref={inputRef}
-      type="text"
-      value={inputValue}
-      onChange={handleInputChange}
-      onKeyPress={handleKeyPress}
-      style={{ fontSize: '2em', width: '40px' }}
-    />
-
-    {showPopup && (
-      <div>
-        <p>정답률: {accuracy.toFixed(2)}%</p>
-        {showButton && (
-          <div>
-            <button className='button_menu' onClick={() => console.log('New Button Clicked')}> 메뉴 </button>
-            <button>다음 레벨 </button>
+        <div>
+          {allWordsDisplayed && (
+            <p>정답률: {accuracy.toFixed(2)}%</p>
+          )}
+          {showButton && (
+            <button className='button_menu' onClick={() => console.log('New Button Clicked')}>처음으로</button>
+          )}
+          {!showButton && (
+            <button className='button_menu' onClick={handleSkip} style={{ fontSize: '1em', margin: '10px' }}>Skip</button>
+          )}
+        </div>
+      </div>
+  <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        {!allWordsDisplayed && showModal && (
+          <div style={{ width: '700px', height: '500px', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', padding: '20px', background: '#fff', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+            <p style={{ fontSize: '4em' }}>Next Word: {currentWord}</p>
           </div>
         )}
-      </div>
-    )}
-  </div>
-
-  <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
   {/* <div>
         <canvas
           ref={canvasRef}
@@ -246,9 +252,8 @@ const Level1 = () => {
       </div> */}
     <div>
       <div className="video-container">
-    <video ref={videoRef} width="50vw" height="100vh" autoPlay></video>
-  </div>
-
+        <video ref={videoRef} width="50vw" height="100vh" autoPlay></video>
+      </div>
     </div>
   </div>
 </div>
