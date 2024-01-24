@@ -59,7 +59,7 @@ const Level1 = () => {
     
       hands.onResults(onResults);
     
-      const socket = io('http://localhost:9999', { withCredentials: true, transports: ['websocket'] });
+      const socket = io('http://172.10.7.41:80', { withCredentials: true, transports: ['websocket'] });
 
     
       const startCamera = async () => {
@@ -105,7 +105,7 @@ const Level1 = () => {
 
   useEffect(() => {
     // 웹소켓 클라이언트 설정
-    socketRef.current = io('http://localhost:9999', { withCredentials: true, transports: ['websocket'] });
+    socketRef.current = io('http://172.10.7.41:80', { withCredentials: true, transports: ['websocket'] });
 
     // 서버로부터 정답 알파벳 수신
     socketRef.current.on('answer', (answer) => {

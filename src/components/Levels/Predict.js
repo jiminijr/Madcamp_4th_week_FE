@@ -8,7 +8,7 @@ const Predict = () => {
 
     useEffect(() => {
         // 웹소켓 연결
-        const socket = io('http://localhost:9999', { withCredentials: true, transports: ['websocket'] });
+        const socket = io('http://172.10.7.41:80', { withCredentials: true, transports: ['websocket'] });
 
         const startCamera = async () => {
             try {
