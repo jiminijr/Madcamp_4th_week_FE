@@ -556,7 +556,7 @@ button:focus {
   font-size: 1.3em;
 }
 .button_menu{
-  background-color: rgba(255, 247, 0, 0.092) !important;
+  background-color: transparent !important;
 }
 
 .level-card-view {

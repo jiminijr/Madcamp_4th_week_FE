@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"; // useHistory 훅 임포트
 import { Camera } from "@mediapipe/camera_utils";
 import { Hands, Results } from "@mediapipe/hands";
 import { drawCanvas } from "../Utils/drawCanvas";
+import styled, { keyframes } from 'styled-components';
 
 
 import AImage from "../../Assets/Letters/a.webp";
@@ -23,7 +24,7 @@ import WImage from "../../Assets/Letters/w.webp";
 import YImage from "../../Assets/Letters/y.webp";
 
 
-const words = ['A', 'O', 'W', 'Y', 'V'];
+const words = ['AOV', 'A', 'O', 'W', 'Y', 'V'];
 
 const images = {
   A: AImage,
@@ -42,6 +43,30 @@ const images = {
   Y: YImage,
 };
 
+
+const fadeIn = keyframes`
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+`;
+
+// 모달창 내 'Next Word' 텍스트의 스타일 정의
+const NextWordText = styled.span`
+  font-size: 1em;
+`;
+// 모달창 내 다음 단어의 스타일 정의
+const NextWordLabel = styled.span`
+  font-size: 3.0em;
+`;
+// 모달창 내 진행도 텍스트의 스타일 정의
+const PageNumber = styled.span`
+  font-size: 0.8em;
+`;
+
+
 const Level1 = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
@@ -57,6 +82,9 @@ const Level1 = () => {
   const [showSmallScreen, setShowSmallScreen] = useState(false); // 작은 화면 표시 여부 상태 추가
   const [nextWord, setNextWord] = useState(''); // 다음 word를 담는 상태 추가
   const [serverAnswer, setServerAnswer] = useState('');
+  const [correctAnswer, setCorrectAnswer] = useState(false);
+  const [showwarning, setShowWarning] = useState(false); // 작은 화면 표시 여부 상태 추가
+  const [totalWords] = useState(words.length); // 전체 단어 수를 추적하는 새로운 상태
   const inputRef = useRef(null);
   const videoRef = useRef(null);
   const socketRef = useRef(null);
@@ -85,36 +113,39 @@ const Level1 = () => {
     navigate("/right/levels"); 
 };
 
+ 
   // 모달 창 스타일 추가 및 어두운 오버레이 스타일
-  const modalStyle = {
-    width: '700px',
-    height: '500px',
-    position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    padding: '20px',
-    background: '#fff',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: '10px', // 꼭짓점을 둥글게 만듦
-    opacity: showModal ? 1 : 0,
-    transition: 'opacity 0.5s',
-  };
+  const ModalContainer = styled.div`
+  width: 1000px;
+  height: 600px;
+  position: fixed;
+  top: 50%;
+  left: 50%; 
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background: #730f72;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  color: white;
+  opacity: ${(props) => (props.showModal ? 1 : 0)};
+  transition: opacity 0.5s;
+  animation: ${fadeIn} 0.5s ease-in-out;  // fadeIn 애니메이션 적용
+`;
 
-  const overlayStyle = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100vw',
-    height: '100vh',
-    background: 'rgba(0, 0, 0, 0.5)', // 어두운 오버레이 색상
-    zIndex: 1, // 모달 창보다 위에 위치
-    borderRadius: 0, // 어두운 오버레이의 꼭짓점을 둥글게 하지 않기
-  };
+  const OverlayContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  border-radius: 0;
+`;
 
   // 모달 창 애니메이션 효과
   const modalTransition = {
@@ -237,11 +268,16 @@ const Level1 = () => {
 
       // 서버로부터 데이터를 수신했을 경우
       socket.on('prediction_result', (data) => {
-          console.log(data);
-          console.log(currentLetter);
-          if (data.alphabet) {
-            // 정답 알파벳과 손동작에 해당하는 알파벳이 일치하는 경우
+        console.log(data);
+        console.log(currentLetter);
+        if (data.alphabet) {
+          // 정답 알파벳과 손동작에 해당하는 알파벳이 일치하는 경우
+          if (String(data.alphabet) === "multi"){
+            setShowWarning(true);
+          }else{
+            setShowWarning(false);
             if (String(data.alphabet) === currentLetter) {
+              setCorrectAnswer(true);
               console.log("correct!");
               setInputValue('');
               setCorrectCount((prevCount) => prevCount + 1);
@@ -266,9 +302,15 @@ const Level1 = () => {
               else {
                 setCurrentLetterIndex((prevIndex) => prevIndex + 1);
               }
+            }else{
+              setCorrectAnswer(false);
             }
-          }
-      });
+          }   
+        }else{
+          setShowWarning(false);
+          setCorrectAnswer(false);
+        }
+    });
 
       return () => {
           socket.disconnect();
@@ -323,8 +365,8 @@ const Level1 = () => {
     <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
         {/* 뒤로가기 버튼 */}
-        <button className='button_menu' style={{ fontSize: '1.5em', margin: '10px', position: 'absolute', top: '10px', left: '10px', zIndex: 2  }} onClick={handleGoBack}>
-          Back
+        <button className='button_menu' style={{ fontSize: '1.5em', margin: '10px', position: 'absolute', top: '10px', left: '10px', zIndex: 2, borderRadius: '20%'  }} onClick={handleGoBack}>
+        ⬅
         </button>
 
         {!allWordsDisplayed && currentWord && (
@@ -333,14 +375,14 @@ const Level1 = () => {
                     src={images[currentLetter]}
                     className="img-fluid"
                     style={{
-                        width: '800px',
+                        width: '600px',
                         height: 'auto',
                         transform: shouldFlipImage ? 'scaleX(-1)' : 'scaleX(1)', // 조건부 스타일 적용
                     }}
                 />
-            <div style={{ marginTop: '5px', textAlign: 'center' }}>
+            <div style={{ marginTop: '5px', textAlign: 'center', letterSpacing: '0.8em'  }}>
               {currentWord.split('').map((letter, index) => (
-                <span key={index} style={{ fontSize: index === currentLetterIndex ? '5em' : '3em', color: index === currentLetterIndex ? 'purple' : 'black' }}>
+                <span key={index} style={{ marginLeft: "12px", fontWeight: "bold" ,fontSize: index === currentLetterIndex ? '5em' : '3em', color: index === currentLetterIndex ? 'purple' : '#ad62b9' }}>
                   {letter}
                 </span>
               ))}
@@ -355,24 +397,42 @@ const Level1 = () => {
             <button className='button_menu' style={{ fontSize: '2em', margin: '10px' }} onClick={() => console.log('New Button Clicked')}>MENU</button>
           )}
           {!showButton && (
-            <button className='button_menu' onClick={handleSkip} style={{ fontSize: '2em', margin: '10px' }}>Skip</button>
+            <button
+            className=""
+            variant="primary"
+            size="lg"
+            style={{backgroundColor: 'transparent', width: '200px' , padding: '10px 10px', fontSize: '2em', margin: '10px', borderRadius: '50px'}} // 버튼 사이즈와 폰트 크기 조정
+            onClick={handleSkip}
+            >Skip letter</button>
           )}
         </div>
       </div>
       {/* 모달 창 및 화면 영역 표시 코드 */}
       {showModal && (
-        <div style={{ ...overlayStyle, ...modalTransition }}>
-          <div style={{ ...modalStyle, clipPath: clipPathStyle }}>
-            <p style={{ fontSize: '4em' }}>Next Word: {currentWord}</p>
-          </div>
-        </div>
+        <OverlayContainer>
+          <ModalContainer showModal={showModal} clipPathStyle={clipPathStyle}>
+            <p style={{ fontSize: '4em' }}>
+              <NextWordText>Next word :</NextWordText>
+              <br />
+              <NextWordLabel>{currentWord}</NextWordLabel> <br />
+              <PageNumber>
+                {currentWordIndex + 1}/{totalWords}
+              </PageNumber>
+            </p>
+          </ModalContainer>
+        </OverlayContainer>
       )}
+
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div>
           {/* 비디오 및 캔버스 표시 코드 */}
           <div className="video-container" style={{ position: 'relative' }}>
             <video ref={videoRef} style={{ display: 'none' }} autoPlay muted></video>
             <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}></canvas>
+            {showwarning && (
+            <div style = {{ position: 'absolute', top: '90%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '2em', fontWeight: 'bold', color: 'white', zIndex: 2 }}> Two Or More Hands Detected!</div>)}
+            {correctAnswer && (
+            <div style = {{ position: 'absolute', top: '90%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '2em', fontWeight: 'bold', color: 'white', zIndex: 2 }}> Correct</div>)}
           </div>
         </div>
       </div>
