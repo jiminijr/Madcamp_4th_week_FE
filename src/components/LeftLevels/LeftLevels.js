@@ -1,5 +1,5 @@
-// Projects.js
-import React from "react";
+// LeftLevels.js
+import React, { useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import LeftLevelsCards from "./LeftLevelsCards";
 import Particle from "../Particle";
@@ -12,13 +12,19 @@ import Typewriter from "typewriter-effect";
 function LeftLevels(props) {
   let navigate = useNavigate();
 
-
+  useEffect(() => {
+    // 컴포넌트가 마운트되면 투명도를 1로, 이동한 위치를 0으로 애니메이션 적용
+    document.querySelectorAll(".level-card").forEach(card => {
+      card.style.opacity = 1;
+      card.style.transform = "translateX(0)";
+    });
+  }, []); // 컴포넌트가 마운트될 때 한 번만 실행
 
   return (
-<Container fluid className="project-section1">
+<Container fluid className="project-section1" >
   <Particle />
   <Container>
-    <div className="typewriter-text">
+    <div className="typewriter-text" style={{fontSize: "1.4em"}}>
       <Typewriter
         options={{
           strings: ['Which <span style="color: purple;">level</span> do you want to play?'],
@@ -29,21 +35,21 @@ function LeftLevels(props) {
         }}
       />
     </div>
-        <Row className="level-card">
+        <Row className="level-card" style={{ opacity: 0, transform: 'translatex(-700px)', transition: 'opacity 0.5s, transform 1s' , backgroundColor: (119, 53, 136, 0.8)}}>
           <LeftLevelsCards
             imgPath={one}
             title="Level 1"
-            path='/left/level1'
+            path='/left/levels'
           />
         </Row>
-        <Row className="level-card">
+        <Row className="level-card" style={{ opacity: 0, transform: 'translatex(700px)', transition: 'opacity 0.5s, transform 1s' }}>
           <LeftLevelsCards
             imgPath={two}
             title="Level 2"
             path='/left/levels'
           />
         </Row >
-        <Row className="level-card">
+        <Row className="level-card" style={{ opacity: 0, transform: 'translatex(-700px)', transition: 'opacity 0.5s, transform 1s' }}>
           <LeftLevelsCards
             imgPath={three}
             title="Level 3"

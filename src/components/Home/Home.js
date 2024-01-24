@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom"; // useHistory 훅 임포트
 import { Container, Row, Col} from "react-bootstrap";
 import Button from "react-bootstrap/Button";
-import homeLogo from "../../Assets/signify.svg";
+import homeLogo from "../../Assets/logo4.svg";
 import Particle from "../Particle";
 import Type from "./Type";
 import About from "../About/About";
@@ -22,18 +22,17 @@ function Home() {
     <section>
       <Container fluid className="home-section" id="home">
         <Particle />
-        <Container className="home-content">
-          <Row>
-            <Col md={5} style={{ paddingBottom: 20 }}>
+        <Col className="home-logo">
               <img
                 src={homeLogo}
                 alt="home pic"
                 className="img-fluid"
-                style={{ maxHeight: "500px" }}
               />
             </Col>
-            <Col md={7} className="home-header">
-              <h1 style={{ paddingBottom: 15 }} className="heading">
+        <Container className="home-content">
+          <Row>
+            <Col md={9} className="home-header">
+              <h1 style={{}} className="heading">
                 Welcome to{" "}
                 <strong className="main-name"> SIGNify</strong>
                 <span className="wave" role="img" aria-labelledby="wave">
@@ -46,8 +45,8 @@ function Home() {
 
               </h1> */}
 
-              <div style={{ padding: 50, textAlign: "left" }}>
-                <Type />
+              <div style={{ padding: 20, textAlign: "left" }}>
+                <Type style={{marginLeft: '80px'}}/>
               </div>
             </Col>
           </Row>
@@ -57,7 +56,7 @@ function Home() {
                 className=""
                 variant="primary"
                 size="lg"
-                style={{ width: '300px' , padding: '10px 30px', fontSize: '2rem', fontFamily: 'sans-serif', marginTop: '60px', marginLeft: '520px', borderRadius: '50px'}} // 버튼 사이즈와 폰트 크기 조정
+                style={{ width: '200px' , padding: '10px 30px', fontSize: '2rem', fontFamily: 'sans-serif', marginTop: '60px', marginLeft: '-280px', borderRadius: '50px'}} // 버튼 사이즈와 폰트 크기 조정
                 onClick={handleStartClick}>
                 Let's go
 

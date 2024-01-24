@@ -3,6 +3,7 @@ import Typewriter from "typewriter-effect";
 
 function Type() {
   return (
+    <div style={{ marginLeft: '80px' }}>
     <Typewriter
       options={{
         strings: [
@@ -14,6 +15,7 @@ function Type() {
         deleteSpeed: 50,
       }}
     />
+    </div>
   );
 }
 

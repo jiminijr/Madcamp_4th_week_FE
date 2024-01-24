@@ -1,11 +1,46 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import io from 'socket.io-client';
 import Webcam from "react-webcam";
+import { useNavigate } from "react-router-dom"; // useHistory 훅 임포트
 import { Camera } from "@mediapipe/camera_utils";
 import { Hands, Results } from "@mediapipe/hands";
-import { drawCanvas } from "../../components/Utils/drawCanvas";
+import { drawCanvas } from "../Utils/drawCanvas";
 
-const words = ['HAPPY', 'LOVE', 'GOOD'];
+
+import AImage from "../../Assets/Letters/a.webp";
+import BImage from "../../Assets/Letters/b.webp";
+import CImage from "../../Assets/Letters/c.webp";
+import DImage from "../../Assets/Letters/d.webp";
+import EImage from "../../Assets/Letters/e.png";
+import FImage from "../../Assets/Letters/f.webp";
+import VImage from "../../Assets/Letters/v.webp";
+import MImage from "../../Assets/Letters/m.webp";
+import NImage from "../../Assets/Letters/n.webp";
+import OImage from "../../Assets/Letters/o.webp";
+import RImage from "../../Assets/Letters/r.webp";
+import TImage from "../../Assets/Letters/t.webp";
+import WImage from "../../Assets/Letters/w.webp";
+import YImage from "../../Assets/Letters/y.webp";
+
+
+const words = ['A', 'O', 'W', 'Y', 'V'];
+
+const images = {
+  A: AImage,
+  B: BImage,
+  C: CImage,
+  D: DImage,
+  E: EImage,
+  F: FImage,
+  V: VImage,
+  M: MImage,
+  N: NImage,
+  O: OImage,
+  R: RImage,
+  T: TImage,
+  W: WImage,
+  Y: YImage,
+};
 
 const Level1 = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
@@ -25,9 +60,30 @@ const Level1 = () => {
   const inputRef = useRef(null);
   const videoRef = useRef(null);
   const socketRef = useRef(null);
-  const webcamRef = useRef(null);
+  const cameraRef = useRef(null);
   const canvasRef = useRef(null);
   
+
+  const navigate = useNavigate(); 
+
+  const handleGoBack = () => {
+    console.log("Button clicked"); // 콘솔에 로그 출력
+
+    // 카메라 리소스 정리
+    if (cameraRef.current) {
+        cameraRef.current.stop();
+        cameraRef.current = null; // 참조 제거
+    }
+  
+    // 비디오 스트림 정리
+    if (videoRef.current && videoRef.current.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null; // 참조 제거
+    }
+
+    // 페이지 이동
+    navigate("/right/levels"); 
+};
 
   // 모달 창 스타일 추가 및 어두운 오버레이 스타일
   const modalStyle = {
@@ -101,7 +157,7 @@ const Level1 = () => {
     }
     console.log(correctCount);
     console.log(totalCount);
-    return (correctCount / (totalCount+1)) * 100;
+    return (correctCount / (totalCount)) * 100;
   };
 
   const onResults = (results) => {
@@ -118,9 +174,7 @@ const Level1 = () => {
   };
 
 
-  
   useEffect(() => {
-
     const hands = new Hands({
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
       });
@@ -137,6 +191,7 @@ const Level1 = () => {
 
       const socket = io('http://172.10.5.163:80', { withCredentials: true, transports: ['websocket'] });
 
+      
       const startCamera = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -183,6 +238,7 @@ const Level1 = () => {
       // 서버로부터 데이터를 수신했을 경우
       socket.on('prediction_result', (data) => {
           console.log(data);
+          console.log(currentLetter);
           if (data.alphabet) {
             // 정답 알파벳과 손동작에 해당하는 알파벳이 일치하는 경우
             if (String(data.alphabet) === currentLetter) {
@@ -216,6 +272,7 @@ const Level1 = () => {
 
       return () => {
           socket.disconnect();
+          
       };
   }, [currentLetterIndex, currentWordIndex]);
 
@@ -255,38 +312,54 @@ const Level1 = () => {
     }
   }, [currentLetterIndex, currentWordIndex]);
 
+  const flipImageLetters = ['A', 'W', 'Y', 'V'];
+
   const currentWord = words[currentWordIndex];
   const currentLetter = currentWord[currentLetterIndex];
+  const shouldFlipImage = flipImageLetters.includes(currentLetter);
 
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
-  };
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+        {/* 뒤로가기 버튼 */}
+        <button className='button_menu' style={{ fontSize: '1.5em', margin: '10px', position: 'absolute', top: '10px', left: '10px', zIndex: 2  }} onClick={handleGoBack}>
+          Back
+        </button>
+
         {!allWordsDisplayed && currentWord && (
-          <div>
-            {currentWord.split('').map((letter, index) => (
-              <span key={index} style={{ fontSize: index === currentLetterIndex ? '3em' : '2em', color: index === currentLetterIndex ? 'purple' : 'black' }}>
-                {letter}
-              </span>
-            ))}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <img
+                    src={images[currentLetter]}
+                    className="img-fluid"
+                    style={{
+                        width: '800px',
+                        height: 'auto',
+                        transform: shouldFlipImage ? 'scaleX(-1)' : 'scaleX(1)', // 조건부 스타일 적용
+                    }}
+                />
+            <div style={{ marginTop: '5px', textAlign: 'center' }}>
+              {currentWord.split('').map((letter, index) => (
+                <span key={index} style={{ fontSize: index === currentLetterIndex ? '5em' : '3em', color: index === currentLetterIndex ? 'purple' : 'black' }}>
+                  {letter}
+                </span>
+              ))}
+            </div>
           </div>
         )}
         <div>
           {allWordsDisplayed && (
-            <p>정답률: {accuracy.toFixed(2)}%</p>
+            <p style={{ fontSize: '100px' }}>ACCURACY: {accuracy.toFixed(2)}%</p>
           )}
           {showButton && (
-            <button className='button_menu' onClick={() => console.log('New Button Clicked')}>처음으로</button>
+            <button className='button_menu' style={{ fontSize: '2em', margin: '10px' }} onClick={() => console.log('New Button Clicked')}>MENU</button>
           )}
           {!showButton && (
-            <button className='button_menu' onClick={handleSkip} style={{ fontSize: '1em', margin: '10px' }}>Skip</button>
+            <button className='button_menu' onClick={handleSkip} style={{ fontSize: '2em', margin: '10px' }}>Skip</button>
           )}
         </div>
       </div>
-      {/* 모달 창 띄우는 부분 */}
+      {/* 모달 창 및 화면 영역 표시 코드 */}
       {showModal && (
         <div style={{ ...overlayStyle, ...modalTransition }}>
           <div style={{ ...modalStyle, clipPath: clipPathStyle }}>
@@ -296,17 +369,15 @@ const Level1 = () => {
       )}
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div>
-        <div className="video-container" style={{ position: 'relative' }}>
-<video ref={videoRef} style={{ display: 'none' }} autoPlay muted></video>
-<canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}></canvas>
-
-</div>
-
+          {/* 비디오 및 캔버스 표시 코드 */}
+          <div className="video-container" style={{ position: 'relative' }}>
+            <video ref={videoRef} style={{ display: 'none' }} autoPlay muted></video>
+            <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}></canvas>
+          </div>
         </div>
       </div>
     </div>
   );
-
 };
-  
+
 export default Level1;
