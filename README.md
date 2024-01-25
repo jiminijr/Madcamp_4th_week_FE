@@ -55,6 +55,9 @@ Modal창이 사리진 뒤 해당 단어가 표시되고 단어 중 학습해야 
 - 점수 페이지
 <img src="https://github.com/jiminijr/Madcamp_4th_week_FE/assets/154505487/e0ae553f-8daa-4f72-b6ba-91e2001f6994">
 
+-왼손 페이지
+<img src="https://github.com/jiminijr/Madcamp_4th_week_FE/assets/154505487/0b378119-0ae2-42f9-808e-8533f31f5331">
+
 
 # 3. 참여자
 - 한양대학교 컴퓨터소프트웨어학부 김선오
