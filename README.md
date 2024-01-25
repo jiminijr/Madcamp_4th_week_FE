@@ -10,15 +10,15 @@
 
 
 # 1.기술 스택
-- ML 학습 : Python, Mediapipe, scikit-learn(randomforest)
-- 웹 : React
-- 웹소켓 : python, Websocket
+- ML : Python, Mediapipe, scikit-learn(randomforest)
+- Frontend : React
+- Backend : python, Flask
 
 
 ## 1-1. ML 파트
 데이터 생성 -> mediapipe를 이용한 feature 추출-> scikit-learn의 randomforest라는 모델을 이용해 학습 ->  model의 predict method를 이용해 웹캠으로 입력받은 feature의 특징을 바탕으로 예측값 출력
 
-1. 26자의 알파벳 별 해당하는 수화사진을 여러 사이즈와 각도로 100장의 사진을 직접 찍은 주었고 mediapipe lib를 이용해 손각락 마디의 위치정보과 각도 정보를 추출하여 pickdata로 변환해 주었다. pickle data는 파이썬 파일을 바이트 단위로 직렬화 하여 데이터를 저장함으로써 용량이 큰 데이터에 대해 파일 전송이나 ML 학습을 할 때 데이터 손실을 최대한 줄일 수 있는 장점이 있습니다.
+1. 26자의 알파벳 별 해당하는 수화사진을 여러 사이즈와 각도로 100장의 사진을 직접 찍은 주었고 mediapipe lib를 이용해 손락 마디의 위치정보과 각도 정보를 추출하여 pickdata로 변환해 주었다. pickle data는 파이썬 파일을 바이트 단위로 직렬화 하여 데이터를 저장함으로써 용량이 큰 데이터에 대해 파일 전송이나 ML 학습을 할 때 데이터 손실을 최대한 줄일 수 있는 장점이 있습니다.
 
 2. python에서 제공하는 ML 학습 모델인 RandomForestClassifier을 이용해 모델을 학습해주었습니다.
 random forest classifier : 데이터를 훈련과정에서 중복을 허용한 뒤 랜덤하게 구성한 다수의 결정 트리들을 학습시켜 과적합 현상을 줄이고 정확도를 높이고자 하였습니다. 이 모델은 주로 분류, 회귀 문제에 적합한 학습모델입니다.
@@ -26,7 +26,7 @@ random forest classifier : 데이터를 훈련과정에서 중복을 허용한 �
 
 
 ## 1-2. Websocket 파트
-위 일련의 과정을 local이 아닌 웹에서 가능하도록 하기 위하여 웹소켓 서버통신 기술을 사용하였습니다. 학습된 모델과 수화를 인식하는 코드 파일을 서버에 올려준뒤 프론트 웹캠에서 받은 영상을 프레임 단위로 실시간으로 서버로 보내고 예측값을 반환하도록 설계하였습니다.
+KAIST에서 제공한 Kcloud VM 환경에서 Flask 서버를 구축했으며 실시간 통신 기술을 사용하기 위해 서버는 웹소켓을 이용한 양방향 통신 체계로 구축되었습니다. 클라이언트에서 프레임 단위로 소켓을 통해 서버에게 이미지 데이터를 전송합니다. 서버에서는 학습된 모델을 기반으로 수신받은 이미지를 분석, 모델에 의해 예측한 알파벳 결과를 소켓을 통해 클라이언트에게 전송합니다.
 
 # 2. 기능 소개
 ## 2-1. 초기화면
