@@ -14,17 +14,16 @@ import CImage from "../../Assets/Letters/c.webp";
 import DImage from "../../Assets/Letters/d.webp";
 import EImage from "../../Assets/Letters/e.png";
 import FImage from "../../Assets/Letters/f.webp";
-import VImage from "../../Assets/Letters/vfl.png";
-import MImage from "../../Assets/Letters/mfl.png";
+import VImage from "../../Assets/Letters/v.webp";
+import MImage from "../../Assets/Letters/m.webp";
 import NImage from "../../Assets/Letters/n.webp";
-import OImage from "../../Assets/Letters/o.webp";
+import OImage from "../../Assets/Letters/ofl.png";
 import RImage from "../../Assets/Letters/r.webp";
 import TImage from "../../Assets/Letters/t.webp";
-import WImage from "../../Assets/Letters/wfl.png";
-import YImage from "../../Assets/Letters/yli.png";
+import WImage from "../../Assets/Letters/w.webp";
+import YImage from "../../Assets/Letters/y.webp";
 
-
-const words = ['AOV', 'A', 'O', 'W', 'Y', 'V'];
+const words = ['MAD', 'DAY', 'WAY', 'COD', 'COW'];
 
 const images = {
   A: AImage,
@@ -53,7 +52,6 @@ const fadeIn = keyframes`
   }
 `;
 
-
 const slideInFromLeft = keyframes`
   from {
     transform: scaleX(0);
@@ -72,6 +70,25 @@ const AnimatedScore = styled.p`
   background-color: '#ba9455';
   border-radius: 20%;
   animation: ${slideInFromLeft} 1s ease forwards;
+`;
+
+const AnimatedImage = styled.img`
+  width: 600px;
+  height: auto;
+  animation: ${fadeIn} 1s ease-in-out; // fadeIn 애니메이션 적용
+`;
+
+// 모달창 내 'Next Word' 텍스트의 스타일 정의
+const NextWordText = styled.span`
+  font-size: 1em;
+`;
+// 모달창 내 다음 단어의 스타일 정의
+const NextWordLabel = styled.span`
+  font-size: 3.0em;
+`;
+// 모달창 내 진행도 텍스트의 스타일 정의
+const PageNumber = styled.span`
+  font-size: 0.8em;
 `;
 
 const FadeInButton = styled.button`
@@ -97,29 +114,7 @@ const FadeInButton1 = styled.button`
   animation-delay: 3s; // 애니메이션 시작 전 대기 시간 설정
 `;
 
-
-
-const AnimatedImage = styled.img`
-  width: 600px;
-  height: auto;
-  animation: ${fadeIn} 1s ease-in-out; // fadeIn 애니메이션 적용
-`;
-
-// 모달창 내 'Next Word' 텍스트의 스타일 정의
-const NextWordText = styled.span`
-  font-size: 1em;
-`;
-// 모달창 내 다음 단어의 스타일 정의
-const NextWordLabel = styled.span`
-  font-size: 3.0em;
-`;
-// 모달창 내 진행도 텍스트의 스타일 정의
-const PageNumber = styled.span`
-  font-size: 0.8em;
-`;
-
-
-const Level2 = () => {
+const Level2Left = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
   const [inputValue, setInputValue] = useState('');
@@ -162,7 +157,7 @@ const Level2 = () => {
     }
 
     // 페이지 이동
-    navigate("/right/levels"); 
+    navigate("/left/levels"); 
 };
 
 const handleGoMenu = () => {
@@ -181,11 +176,11 @@ const handleGoMenu = () => {
     }
 
     // 페이지 이동
-    navigate("/right/levels"); 
+    navigate("/left/levels"); 
 };
  
 
-const handleGoLevel2 = () => {
+const handleGoLevel1 = () => {
     console.log("Button clicked"); // 콘솔에 로그 출력
 
     // 카메라 리소스 정리
@@ -201,7 +196,7 @@ const handleGoLevel2 = () => {
     }
 
     // 페이지 이동
-    navigate("/right/Level2"); 
+    navigate("/left/level2"); 
 };
 
   // 모달 창 스타일 추가 및 어두운 오버레이 스타일
@@ -293,6 +288,7 @@ const handleGoLevel2 = () => {
       drawCanvas(ctx, results);
     }
   };
+
 
 
   useEffect(() => {
@@ -447,6 +443,19 @@ const handleGoLevel2 = () => {
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div>
+          {/* 비디오 및 캔버스 표시 코드 */}
+          <div className="video-container" style={{ position: 'relative' }}>
+            <video ref={videoRef} style={{ display: 'none' }} autoPlay muted></video>
+            <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}></canvas>
+            {showwarning && (
+            <div style = {{ position: 'absolute', top: '90%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '2em', fontWeight: 'bold', color: 'white', zIndex: 2 }}> Two Or More Hands Detected!</div>)}
+            {correctAnswer && (
+            <div style = {{ position: 'absolute', top: '90%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '2em', fontWeight: 'bold', color: 'white', zIndex: 2 }}> Correct</div>)}
+          </div>
+        </div>
+      </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
         {/* 뒤로가기 버튼 */}
         <button className='button_menu' style={{ fontSize: '1.5em', margin: '10px', position: 'absolute', top: '10px', left: '10px', zIndex: 2, borderRadius: '20%'  }} onClick={handleGoBack}>
@@ -479,11 +488,12 @@ const handleGoLevel2 = () => {
          {
   allWordsDisplayed && showButton && (
     <>
-      <FadeInButton onClick={handleGoLevel2}>Try Again</FadeInButton>
+      <FadeInButton onClick={handleGoLevel1}>Try Again</FadeInButton>
       <FadeInButton1 onClick={handleGoMenu}>Choose Level</FadeInButton1>
     </>
   )
 }
+
           {!showButton && (
             <button
             className=""
@@ -511,21 +521,9 @@ const handleGoLevel2 = () => {
         </OverlayContainer>
       )}
 
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <div>
-          {/* 비디오 및 캔버스 표시 코드 */}
-          <div className="video-container" style={{ position: 'relative' }}>
-            <video ref={videoRef} style={{ display: 'none' }} autoPlay muted></video>
-            <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}></canvas>
-            {showwarning && (
-            <div style = {{ position: 'absolute', top: '90%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '2em', fontWeight: 'bold', color: 'white', zIndex: 2 }}> Two Or More Hands Detected!</div>)}
-            {correctAnswer && (
-            <div style = {{ position: 'absolute', top: '90%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '2em', fontWeight: 'bold', color: 'white', zIndex: 2 }}> Correct</div>)}
-          </div>
-        </div>
-      </div>
+      
     </div>
   );
 };
 
-export default Level2;
+export default Level2Left;

@@ -17,6 +17,8 @@ import Level1 from "./components/Levels/Level1";
 import Level2 from "./components/Levels/Level2";
 import Level3 from "./components/Levels/Level3";
 import Level1Left from "./components/Levels/Level1Left";
+import Level2Left from "./components/Levels/Level2Left";
+import Level3Left from "./components/Levels/Level3Left";
 
 function App() {
   const [load, updateLoad] = useState(true);
@@ -59,6 +61,8 @@ function PageTransitions() {
           <Route path="/right/level2" element={<Level2/>} />
           <Route path="/right/level3" element={<Level3/>} />
           <Route path="/left/level1" element={<Level1Left/>} />
+          <Route path="/left/level2" element={<Level2Left/>} />
+          <Route path="/left/level3" element={<Level3Left/>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </CSSTransition>

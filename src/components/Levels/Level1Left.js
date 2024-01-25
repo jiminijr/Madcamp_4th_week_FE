@@ -1,33 +1,280 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import io from 'socket.io-client';
 import Webcam from "react-webcam";
+import { useNavigate } from "react-router-dom"; // useHistory 훅 임포트
 import { Camera } from "@mediapipe/camera_utils";
 import { Hands, Results } from "@mediapipe/hands";
-import { drawCanvas } from "../../components/Utils/drawCanvas";
+import { drawCanvas } from "../Utils/drawCanvas";
+import styled, { keyframes } from 'styled-components';
 
-const words = ['happy', 'love', 'good'];
+
+import AImage from "../../Assets/Letters/afl.png";
+import BImage from "../../Assets/Letters/b.webp";
+import CImage from "../../Assets/Letters/c.webp";
+import DImage from "../../Assets/Letters/d.webp";
+import EImage from "../../Assets/Letters/e.png";
+import FImage from "../../Assets/Letters/f.webp";
+import VImage from "../../Assets/Letters/v.webp";
+import MImage from "../../Assets/Letters/m.webp";
+import NImage from "../../Assets/Letters/n.webp";
+import OImage from "../../Assets/Letters/ofl.png";
+import RImage from "../../Assets/Letters/r.webp";
+import TImage from "../../Assets/Letters/t.webp";
+import WImage from "../../Assets/Letters/w.webp";
+import YImage from "../../Assets/Letters/y.webp";
+
+const words = ['MAD', 'DAY', 'WAY', 'COD', 'COW'];
+
+const images = {
+  A: AImage,
+  B: BImage,
+  C: CImage,
+  D: DImage,
+  E: EImage,
+  F: FImage,
+  V: VImage,
+  M: MImage,
+  N: NImage,
+  O: OImage,
+  R: RImage,
+  T: TImage,
+  W: WImage,
+  Y: YImage,
+};
+
+
+const fadeIn = keyframes`
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+`;
+
+const slideInFromLeft = keyframes`
+  from {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  to {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+`;
+
+const AnimatedScore = styled.p`
+  font-size: 80px;
+  color: #ad62b9;
+  font-weight: bold;
+  background-color: '#ba9455';
+  border-radius: 20%;
+  animation: ${slideInFromLeft} 1s ease forwards;
+`;
+
+const AnimatedImage = styled.img`
+  width: 600px;
+  height: auto;
+  animation: ${fadeIn} 1s ease-in-out; // fadeIn 애니메이션 적용
+`;
+
+// 모달창 내 'Next Word' 텍스트의 스타일 정의
+const NextWordText = styled.span`
+  font-size: 1em;
+`;
+// 모달창 내 다음 단어의 스타일 정의
+const NextWordLabel = styled.span`
+  font-size: 3.0em;
+`;
+// 모달창 내 진행도 텍스트의 스타일 정의
+const PageNumber = styled.span`
+  font-size: 0.8em;
+`;
+
+const FadeInButton = styled.button`
+  background-color: transparent;
+  padding: 10px 10px;
+  font-size: 1.3em;
+  margin: 10px;
+  border-radius: 50px;
+  opacity: 0; // 초기에는 보이지 않게 설정
+  animation: ${fadeIn} 1s ease forwards; // fadeIn 애니메이션 적용
+  animation-delay: 2s; // 애니메이션 시작 전 대기 시간 설정
+`;
+
+
+const FadeInButton1 = styled.button`
+  background-color: transparent;
+  padding: 10px 10px;
+  font-size: 1.3em;
+  margin: 10px;
+  border-radius: 50px;
+  opacity: 0; // 초기에는 보이지 않게 설정
+  animation: ${fadeIn} 1s ease forwards; // fadeIn 애니메이션 적용
+  animation-delay: 3s; // 애니메이션 시작 전 대기 시간 설정
+`;
 
 const Level1Left = () => {
-    
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
   const [inputValue, setInputValue] = useState('');
   const [correctCount, setCorrectCount] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const [wordCount, setWordCount] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
-  const [incorrectCount, setIncorrectCount] = useState(0);
   const [allWordsDisplayed, setAllWordsDisplayed] = useState(false);
   const [showButton, setShowButton] = useState(false); // 새로운 버튼 표시 여부 상태 추가
+  const [showModal, setShowModal] = useState(false);
   const [showSmallScreen, setShowSmallScreen] = useState(false); // 작은 화면 표시 여부 상태 추가
   const [nextWord, setNextWord] = useState(''); // 다음 word를 담는 상태 추가
   const [serverAnswer, setServerAnswer] = useState('');
+  const [correctAnswer, setCorrectAnswer] = useState(false);
+  const [showwarning, setShowWarning] = useState(false); // 작은 화면 표시 여부 상태 추가
+  const [totalWords] = useState(words.length); // 전체 단어 수를 추적하는 새로운 상태
   const inputRef = useRef(null);
   const videoRef = useRef(null);
   const socketRef = useRef(null);
-  const webcamRef = useRef(null);
+  const cameraRef = useRef(null);
   const canvasRef = useRef(null);
+  
 
+  const navigate = useNavigate(); 
+
+  const handleGoBack = () => {
+    console.log("Button clicked"); // 콘솔에 로그 출력
+
+    // 카메라 리소스 정리
+    if (cameraRef.current) {
+        cameraRef.current.stop();
+        cameraRef.current = null; // 참조 제거
+    }
+  
+    // 비디오 스트림 정리
+    if (videoRef.current && videoRef.current.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null; // 참조 제거
+    }
+
+    // 페이지 이동
+    navigate("/left/levels"); 
+};
+
+const handleGoMenu = () => {
+    console.log("Button clicked"); // 콘솔에 로그 출력
+
+    // 카메라 리소스 정리
+    if (cameraRef.current) {
+        cameraRef.current.stop();
+        cameraRef.current = null; // 참조 제거
+    }
+  
+    // 비디오 스트림 정리
+    if (videoRef.current && videoRef.current.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null; // 참조 제거
+    }
+
+    // 페이지 이동
+    navigate("/left/levels"); 
+};
+ 
+
+const handleGoLevel1 = () => {
+    console.log("Button clicked"); // 콘솔에 로그 출력
+
+    // 카메라 리소스 정리
+    if (cameraRef.current) {
+        cameraRef.current.stop();
+        cameraRef.current = null; // 참조 제거
+    }
+  
+    // 비디오 스트림 정리
+    if (videoRef.current && videoRef.current.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null; // 참조 제거
+    }
+
+    // 페이지 이동
+    navigate("/left/Level1"); 
+};
+
+  // 모달 창 스타일 추가 및 어두운 오버레이 스타일
+  const ModalContainer = styled.div`
+  width: 1000px;
+  height: 600px;
+  position: fixed;
+  top: 50%;
+  left: 50%; 
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background: #730f72;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  color: white;
+  opacity: ${(props) => (props.showModal ? 1 : 0)};
+  transition: opacity 0.5s;
+  animation: ${fadeIn} 0.5s ease-in-out;  // fadeIn 애니메이션 적용
+`;
+
+  const OverlayContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  border-radius: 0;
+`;
+
+  // 모달 창 애니메이션 효과
+  const modalTransition = {
+    opacity: showModal ? 1 : 0,
+    transition: 'opacity 0.5s',
+  };
+
+  // clipPath를 통한 애니메이션 효과는 클래스를 추가하여 적용
+  const clipPathStyle = showModal ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%)' : 'polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%)';
+
+  // skip버튼을 눌렀을 때 동작
+  const handleSkip = () => {
+    // 모든 단어가 끝났을 경우
+    if ((currentWordIndex === words.length - 1) && (currentLetterIndex === words[currentWordIndex].length - 1)) {
+      setTotalCount((prevIndex) => prevIndex + 1);
+      setShowPopup(true);
+      setAllWordsDisplayed(true);
+      setShowButton(true); // 단어의 마지막 철자일 때 버튼 표시
+      setAccuracy(calculateAccuracy());
+      return;
+    }
+    // 단어 하나가 끝났을 경우
+    if (currentLetterIndex === words[currentWordIndex].length - 1) {
+      setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
+      setCurrentLetterIndex(0);
+      setTotalCount((prevIndex) => prevIndex + 1);
+    }
+    // 단어 중간인 경우
+    else {
+      setCurrentLetterIndex((prevIndex) => prevIndex + 1);
+      setTotalCount((prevIndex) => prevIndex + 1);
+    }
+    setShowButton(false); // 단어의 마지막 철자가 아닐 때 버튼 숨김
+  };
+
+  // 정답률 계산 함수
+  const calculateAccuracy = () => {
+    if (totalCount === 0) {
+      return 0;
+    }
+    console.log(correctCount);
+    console.log(totalCount);
+    return (correctCount / (totalCount)) * 100;
+  };
 
   const onResults = (results) => {
     // MediaPipe 결과를 캔버스에 그리는 로직
@@ -44,72 +291,125 @@ const Level1Left = () => {
 
 
 
-
   useEffect(() => {
     const hands = new Hands({
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-      });
-    
-      hands.setOptions({
+    });
+
+
+    hands.setOptions({
         maxNumHands: 2,
         modelComplexity: 1,
         minDetectionConfidence: 0.5,
         minTrackingConfidence: 0.5
-      });
-    
-      hands.onResults(onResults);
-    
-      const socket = io('http://172.10.7.41:80', { withCredentials: true, transports: ['websocket'] });
+    });
 
-    
-      const startCamera = async () => {
+    hands.onResults(onResults);
+
+    const socket = io('http://172.10.5.163:80', { withCredentials: true, transports: ['websocket'] });
+
+    const startCamera = async () => {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-          videoRef.current.srcObject = stream;
-  
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current.play();
-  
-            const captureImage = () => {
-              if (videoRef.current) {
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.width = videoRef.current.videoWidth;
-                canvas.height = videoRef.current.videoHeight;
-                context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-                const imageData = canvas.toDataURL('image/jpeg', 0.8);
-                socket.emit('prediction', imageData);
-              }
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            videoRef.current.srcObject = stream;
+
+            videoRef.current.onloadedmetadata = () => {
+                videoRef.current.play();
+
+                // 여기서 Camera 객체를 생성하고 시작합니다.
+                const camera = new Camera(videoRef.current, {
+                    onFrame: async () => {
+                        //   console.log('Sending frame to MediaPipe');
+                        await hands.send({ image: videoRef.current });
+                    },
+                    width: 640,
+                    height: 480
+                });
+                camera.start();
+
+                // 이미지 캡쳐 후 웹소켓을 통해 서버로 이미지 전송
+                const captureImage = () => {
+                    if (videoRef.current) {
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.width = videoRef.current.videoWidth;
+                        canvas.height = videoRef.current.videoHeight;
+                        context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+                        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                        socket.emit('prediction', imageData);
+                    }
+                };
+                // 서버로 전송하는 시간 간격 설정
+                const intervalId = setInterval(captureImage, 1000);
+
+                return () => clearInterval(intervalId);
             };
-  
-            const intervalId = setInterval(captureImage, 500);
-  
-            return () => clearInterval(intervalId);
-          };
         } catch (error) {
-          console.error('웹캠 액세스 오류:', error);
+            console.error('웹캠 액세스 오류:', error);
         }
-      };
-  
-      startCamera();
+    };
 
-      socket.on('prediction_result', (data) => {
-          console.log(data);
-          // 여기서 data를 활용하여 결과를 표시하거나 상태를 업데이트할 수 있습니다.
-      });
+    startCamera();
 
-      return () => {
-          socket.disconnect();
-      };
-  }, []);
+    // 서버로부터 데이터를 수신했을 경우
+    socket.on('prediction_result', (data) => {
+        console.log(data);
+        console.log(currentLetter);
+        if (data.alphabet) {
+            // 두 개 이상의 손을 감지했을 경우
+            if (String(data.alphabet) == "multi") {
+                setShowWarning(true);
+            } else {
+                setShowWarning(false);
+                // 정답 알파벳과 손동작에 해당하는 알파벳이 일치하는 경우
+                if (String(data.alphabet) === currentLetter) {
+                    console.log("correct!");
+                    setInputValue('');
+                    setCorrectCount((prevCount) => prevCount + 1);
+                    setTotalCount((prevCount) => prevCount + 1);
+
+                    // 단어 하나가 끝났을 경우
+                    if (currentLetterIndex === currentWord.length - 1) {
+                        setWordCount((prevIndex) => prevIndex + 1);
+                        // 전체 단어가 끝났을 경우
+                        if (currentWordIndex === words.length - 1) {
+                            setShowPopup(true);
+                            setAllWordsDisplayed(true);
+                            setAccuracy(calculateAccuracy());
+                            setShowButton(true);
+                            return;
+                        } else {
+                            setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
+                            setCurrentLetterIndex(0);
+                        }
+                    }
+                    // 단어 중간일 경우
+                    else {
+                        setCurrentLetterIndex((prevIndex) => prevIndex + 1);
+                    }
+                }
+            }
+        }
+        // 손을 감지하지 못했을 경우
+        else {
+            setShowWarning(false);
+        }
+    });
+
+    return () => {
+        socket.disconnect();
+    };
+}, [currentLetterIndex, currentWordIndex]);
 
   useEffect(() => {
     // 웹소켓 클라이언트 설정
-    socketRef.current = io('http://172.10.7.41:80', { withCredentials: true, transports: ['websocket'] });
+    socketRef.current = io('http://172.10.5.163:80', { withCredentials: true, transports: ['websocket'] });
 
     // 서버로부터 정답 알파벳 수신
+    // 이거 없애도 될 듯
     socketRef.current.on('answer', (answer) => {
       setServerAnswer(answer);
+      
     });
 
     return () => {
@@ -117,142 +417,113 @@ const Level1Left = () => {
     };
   }, []);
 
+   // 모달 창 띄우는 곳
+   useEffect(() => {
+    if (currentLetterIndex === 0) {
+      setShowModal(true);
 
-  const handleKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      // 사용자 입력과 서버 응답 비교
-      if (inputValue.toLowerCase() === serverAnswer.toLowerCase()) {
-        setCorrectCount((prevCount) => prevCount + 1);
-        if (correctCount + 1 >= 5) {
-          console.log('정답!');
-        }
-      } else {
-        console.log('오답');
-      }
-      setInputValue('');
-      setTotalCount((prevCount) => prevCount + 1);
+      // 모달 창 나타나는 애니메이션
+      setTimeout(() => {
+        setShowModal(true);
+      }, 100);
+
+      const modalTimeoutId = setTimeout(() => {
+        setShowModal(false);
+      }, 3000);
+
+      return () => {
+        clearTimeout(modalTimeoutId);
+      };
     }
-  };
-
-  useEffect(() => {
-    let timeoutId; // 타이머 식별자를 저장할 변수
-  
-    const showSmallScreenTimer = () => {
-      setShowSmallScreen(true);
-      setNextWord(words[(currentWordIndex + 1) % words.length]); // 다음 word 설정
-  
-      // 입력 받는 시간 설정
-      const inputTime = currentWordIndex === 0 ? 10000 : 5000;
-  
-      timeoutId = setTimeout(() => {
-        setShowSmallScreen(false);
-        setNextWord(''); // 다음 word 초기화
-  
-      }, inputTime);
-    };
-
-    const mainTimer = () => {
-      if (currentLetterIndex === words[currentWordIndex].length - 1) {
-        setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
-        setCurrentLetterIndex(0);
-        setInputValue('');
-        setIncorrectCount(0);
-  
-        if (currentWordIndex === words.length - 1 && allWordsDisplayed) {
-          // 수정: 정답률 계산을 현재까지의 맞춘 철자 수로 변경
-          // const newAccuracy = (correctCount / totalCount) * 100;
-          // setAccuracy(newAccuracy);
-          console.log("useeffect 최종 갯수 :", correctCount);
-          console.log("useeffect 총 count 갯수 :", totalCount);
-          setShowPopup(true);
-          // 새로운 버튼 표시
-          setShowButton(true);
-          // 수정: 모든 단어를 표시했음을 초기화
-          setAllWordsDisplayed(true);
-
-          setTimeout(() => {
-            setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
-          }, 5000);
-        }
-      } else {
-        setCurrentLetterIndex((prevIndex) => prevIndex + 1);
-      }
-      setTotalCount((prevCount) => prevCount + 1);
-      // 작은 화면 타이머 재시작
-      showSmallScreenTimer();
-    };
-
-    timeoutId = setTimeout(mainTimer, 3000); // 초기 실행
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [currentWordIndex, currentLetterIndex, allWordsDisplayed, correctCount, totalCount, showPopup]);
+  }, [currentLetterIndex, currentWordIndex]);
 
   const currentWord = words[currentWordIndex];
   const currentLetter = currentWord[currentLetterIndex];
 
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
-  };
 
   return (
-    
-<div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
-
-
-  <div style={{ flex: 1, display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-    <div>
-      <div className="video-container">
-    <video ref={videoRef} width="50vw" height="100vh" autoPlay></video>
-  </div>
-
-    {!allWordsDisplayed && currentWord && (
-      <div>
-        {currentWord.split('').map((letter, index) => (
-          <span key={index} style={{ fontSize: index === currentLetterIndex ? '3em' : '2em' }}>
-            {letter}
-          </span>
-        ))}
+    <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div>
+          {/* 비디오 및 캔버스 표시 코드 */}
+          <div className="video-container" style={{ position: 'relative' }}>
+            <video ref={videoRef} style={{ display: 'none' }} autoPlay muted></video>
+            <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}></canvas>
+            {showwarning && (
+            <div style = {{ position: 'absolute', top: '90%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '2em', fontWeight: 'bold', color: 'white', zIndex: 2 }}> Two Or More Hands Detected!</div>)}
+            {correctAnswer && (
+            <div style = {{ position: 'absolute', top: '90%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '2em', fontWeight: 'bold', color: 'white', zIndex: 2 }}> Correct</div>)}
+          </div>
+        </div>
       </div>
-    )}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+        {/* 뒤로가기 버튼 */}
+        <button className='button_menu' style={{ fontSize: '1.5em', margin: '10px', position: 'absolute', top: '10px', left: '10px', zIndex: 2, borderRadius: '20%'  }} onClick={handleGoBack}>
+        ⬅
+        </button>
 
-    <input
-      ref={inputRef}
-      type="text"
-      value={inputValue}
-      onChange={handleInputChange}
-      onKeyPress={handleKeyPress}
-      style={{ fontSize: '2em', width: '40px' }}
-    />
+        {!allWordsDisplayed && currentWord && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+<AnimatedImage
+  key={`${currentWordIndex}-${currentLetterIndex}`} // 현재 단어와 글자 인덱스를 조합하여 고유한 key 생성
+  src={images[currentWord[currentLetterIndex]]}
+  alt={`Letter ${currentWord[currentLetterIndex]}`}
+/>
 
-    {showPopup && (
-      <div>
-        <p>정답률: {accuracy.toFixed(2)}%</p>
-        {showButton && (
-          <div>
-            <button className='button_menu' onClick={() => console.log('New Button Clicked')}> 메뉴 </button>
-            <button>다음 레벨 </button>
+            <div style={{ marginTop: '5px', textAlign: 'center', letterSpacing: '0.8em'  }}>
+              {currentWord.split('').map((letter, index) => (
+                <span key={index} style={{ marginLeft: "12px", fontWeight: "bold" ,fontSize: index === currentLetterIndex ? '5em' : '3em', color: index === currentLetterIndex ? 'purple' : '#ad62b9' }}>
+                  {letter}
+                </span>
+              ))}
+            </div>
           </div>
         )}
+        <div>
+        {
+  allWordsDisplayed && (
+    <AnimatedScore>Score: {accuracy.toFixed(1)}% 👏🏻</AnimatedScore>
+  )
+}
+         {
+  allWordsDisplayed && showButton && (
+    <>
+      <FadeInButton onClick={handleGoLevel1}>Try Again</FadeInButton>
+      <FadeInButton1 onClick={handleGoMenu}>Choose Level</FadeInButton1>
+    </>
+  )
+}
+
+          {!showButton && (
+            <button
+            className=""
+            variant="primary"
+            size="lg"
+            style={{backgroundColor: 'transparent', width: '200px' , padding: '10px 10px', fontSize: '2em', margin: '10px', borderRadius: '50px'}} // 버튼 사이즈와 폰트 크기 조정
+            onClick={handleSkip}
+            >Skip letter</button>
+          )}
+        </div>
       </div>
-    )}
-  </div>
+      {/* 모달 창 및 화면 영역 표시 코드 */}
+      {!allWordsDisplayed &&showModal && (
+        <OverlayContainer>
+          <ModalContainer showModal={showModal} clipPathStyle={clipPathStyle}>
+            <p style={{ fontSize: '4em' }}>
+              <NextWordText>Next word :</NextWordText>
+              <br />
+              <NextWordLabel>{currentWord}</NextWordLabel> <br />
+              <PageNumber>
+                {currentWordIndex + 1}/{totalWords}
+              </PageNumber>
+            </p>
+          </ModalContainer>
+        </OverlayContainer>
+      )}
 
-  <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-  {/* <div>
-        <canvas
-          ref={canvasRef}
-          width={640}
-          height={1000}
-        />
-      </div> */}
-
-
+      
     </div>
-  </div>
-</div>
+  );
+};
 
-  );};
-  
-  export default Level1Left;
+export default Level1Left;
