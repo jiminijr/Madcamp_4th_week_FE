@@ -8,20 +8,20 @@ import { drawCanvas } from "../Utils/drawCanvas";
 import styled, { keyframes } from 'styled-components';
 
 
-import AImage from "../../Assets/Letters/a.webp";
+import AImage from "../../Assets/Letters/afl.png";
 import BImage from "../../Assets/Letters/b.webp";
 import CImage from "../../Assets/Letters/c.webp";
 import DImage from "../../Assets/Letters/d.webp";
 import EImage from "../../Assets/Letters/e.png";
 import FImage from "../../Assets/Letters/f.webp";
-import VImage from "../../Assets/Letters/v.webp";
-import MImage from "../../Assets/Letters/m.webp";
+import VImage from "../../Assets/Letters/vfl.png";
+import MImage from "../../Assets/Letters/mfl.png";
 import NImage from "../../Assets/Letters/n.webp";
 import OImage from "../../Assets/Letters/o.webp";
 import RImage from "../../Assets/Letters/r.webp";
 import TImage from "../../Assets/Letters/t.webp";
-import WImage from "../../Assets/Letters/w.webp";
-import YImage from "../../Assets/Letters/y.webp";
+import WImage from "../../Assets/Letters/wfl.png";
+import YImage from "../../Assets/Letters/yli.png";
 
 
 const words = ['AOV', 'A', 'O', 'W', 'Y', 'V'];
@@ -51,6 +51,14 @@ const fadeIn = keyframes`
   100% {
     opacity: 1;
   }
+`;
+
+
+
+const AnimatedImage = styled.img`
+  width: 600px;
+  height: auto;
+  animation: ${fadeIn} 1s ease-in-out; // fadeIn 애니메이션 적용
 `;
 
 // 모달창 내 'Next Word' 텍스트의 스타일 정의
@@ -113,7 +121,45 @@ const Level1 = () => {
     navigate("/right/levels"); 
 };
 
+const handleGoMenu = () => {
+    console.log("Button clicked"); // 콘솔에 로그 출력
+
+    // 카메라 리소스 정리
+    if (cameraRef.current) {
+        cameraRef.current.stop();
+        cameraRef.current = null; // 참조 제거
+    }
+  
+    // 비디오 스트림 정리
+    if (videoRef.current && videoRef.current.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null; // 참조 제거
+    }
+
+    // 페이지 이동
+    navigate("/right/levels"); 
+};
  
+
+const handleGoLevel1 = () => {
+    console.log("Button clicked"); // 콘솔에 로그 출력
+
+    // 카메라 리소스 정리
+    if (cameraRef.current) {
+        cameraRef.current.stop();
+        cameraRef.current = null; // 참조 제거
+    }
+  
+    // 비디오 스트림 정리
+    if (videoRef.current && videoRef.current.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null; // 참조 제거
+    }
+
+    // 페이지 이동
+    navigate("/right/level1"); 
+};
+
   // 모달 창 스타일 추가 및 어두운 오버레이 스타일
   const ModalContainer = styled.div`
   width: 1000px;
@@ -354,11 +400,11 @@ const Level1 = () => {
     }
   }, [currentLetterIndex, currentWordIndex]);
 
-  const flipImageLetters = ['A', 'W', 'Y', 'V'];
+
 
   const currentWord = words[currentWordIndex];
   const currentLetter = currentWord[currentLetterIndex];
-  const shouldFlipImage = flipImageLetters.includes(currentLetter);
+
 
 
   return (
@@ -371,15 +417,12 @@ const Level1 = () => {
 
         {!allWordsDisplayed && currentWord && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <img
-                    src={images[currentLetter]}
-                    className="img-fluid"
-                    style={{
-                        width: '600px',
-                        height: 'auto',
-                        transform: shouldFlipImage ? 'scaleX(-1)' : 'scaleX(1)', // 조건부 스타일 적용
-                    }}
-                />
+<AnimatedImage
+  key={`${currentWordIndex}-${currentLetterIndex}`} // 현재 단어와 글자 인덱스를 조합하여 고유한 key 생성
+  src={images[currentWord[currentLetterIndex]]}
+  alt={`Letter ${currentWord[currentLetterIndex]}`}
+/>
+
             <div style={{ marginTop: '5px', textAlign: 'center', letterSpacing: '0.8em'  }}>
               {currentWord.split('').map((letter, index) => (
                 <span key={index} style={{ marginLeft: "12px", fontWeight: "bold" ,fontSize: index === currentLetterIndex ? '5em' : '3em', color: index === currentLetterIndex ? 'purple' : '#ad62b9' }}>
@@ -391,10 +434,13 @@ const Level1 = () => {
         )}
         <div>
           {allWordsDisplayed && (
-            <p style={{ fontSize: '100px' }}>ACCURACY: {accuracy.toFixed(2)}%</p>
+            <p style={{ fontSize: '80px', color:"#ad62b9", fontWeight:"bold", backgroundColor: "yellow", borderRadius: "20%"}}>Score: {accuracy.toFixed(1)}% 👏🏻</p>
+          )}
+           {showButton && (
+            <button className='button_menu' style={{backgroundColor: 'transparent', width: '200px' , padding: '10px 10px', fontSize: '1.3em', margin: '10px', borderRadius: '50px'}} onClick={(handleGoLevel1) }>Try Again</button>
           )}
           {showButton && (
-            <button className='button_menu' style={{ fontSize: '2em', margin: '10px' }} onClick={() => console.log('New Button Clicked')}>MENU</button>
+            <button className='button_menu' style={{backgroundColor: 'transparent', width: '300px' , padding: '10px 10px', fontSize: '1.3em', margin: '10px', borderRadius: '50px'}} onClick={(handleGoMenu) }>Choose Level</button>
           )}
           {!showButton && (
             <button

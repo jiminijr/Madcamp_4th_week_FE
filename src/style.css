@@ -471,16 +471,18 @@ button:focus {
 /* Projects */
 /* --------- */
 .project-section {
+  overflow: hidden  !important;
   position: relative !important;
-  padding-top: 150px !important;
+  padding-top: 80px  !important;
   padding-bottom: 30px !important;
   height: 100% !important;
 
 }
 
 .project-section1 {
+  overflow: hidden  !important;
   position: relative !important;
-  padding-top: 150px !important;
+  padding-top: 80px !important;
   padding-bottom: 30px !important;
   height: 100% !important;
   display: flex;
@@ -510,6 +512,7 @@ button:focus {
 }
 
 .project-card-view {
+  overflow: hidden;
   box-shadow: 0px 0px  15px 5px rgba(119, 53, 136, 0.8) !important;
   color: black !important;
   background-color: rgba(84, 0, 59, 0.216) !important;
@@ -669,6 +672,22 @@ button:focus {
   overflow: hidden !important;
   transition: all 0.4s ease 0s !important;
 }
+
+/* Fade-in 애니메이션 키프레임 정의 */
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+  }
+  to {
+      opacity: 1;
+  }
+}
+
+/* 애니메이션 적용을 위한 클래스 */
+.fade-in {
+  animation: fadeIn 1s ease-in-out; /* 1초 동안 fade-in 애니메이션 적용 */
+}
+
 
 @media (max-width: 767px) {
   .tech-icons {
