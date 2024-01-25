@@ -3,7 +3,7 @@
   <a href="https://soumyajit.vercel.app/" target="_blank">수화학습 도우미</a>
 </h2>
 <div align="center">
-  <img alt="Demo" src="./Images/readme-img1.png" />
+  <img src="https://github.com/jiminijr/Madcamp_4th_week_FE/assets/154505487/2ca1b1a7-d510-4509-8874-e695d5ad12a6">
 </div>
 
 <br/>
