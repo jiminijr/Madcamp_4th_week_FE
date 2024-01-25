@@ -41,7 +41,7 @@ level2로 들어가게 되면 학습할 단어가 Modal 창으로 3초간 뜨게
 <img src="https://github.com/jiminijr/Madcamp_4th_week_FE/assets/154505487/4c74c64d-0e5a-4daf-814e-2c1f2b38724e">
 
 Modal창이 사리진 뒤 해당 단어가 표시되고 단어 중 학습해야 될 알파벳이 손이미지와 함께 다른 색깔로 표시됩니다. 
-<img src="https://github.com/jiminijr/Madcamp_4th_week_FE/assets/154505487/dd396eff-5b89-41d9-b94a-2d33a3fe5779">
+<img src="https://github.com/jiminijr/Madcamp_4th_week_FE/assets/154505487/4654d79d-94ba-45a1-a437-e3941e10b8d2">
 
 정답을 맞출때까지 다음창으로 넘어가지 않도록 설계하였으며, skip 버튼을 통해 어려운 손동작은 넘어가게 설계하였습니다. 마지막 단어까지 풀게되면 정확하게 맞춘 알파벳의 갯수를 전체 단어의 갯수 나누어 점수를 띄워주었습니다.
 
